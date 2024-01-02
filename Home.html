@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Space shooter game</title>
+    <link
+      href="https://fonts.cdnfonts.com/css/press-start-2p"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="style.css" />
+    <script src="script.js" defer></script>
+  </head>
+  <body>
+    <audio id="musicplayer" autoplay>
+      <source src="Brave-pilots.ogg" />
+    </audio>
+    <div id="start-screen" class="screen" style="display: block">
+      <div id="game-tittle">
+        <h1>PROJECT PARADOX</h1>
+      </div>
+      <div id="start-button-container">
+        <button id="start-button" onclick="begin()">Start Game</button>
+      </div>
+    </div>
+    <script>
+      let play = document.getElementById("start-button");
+      function playMusic() {
+        let audio = new Audio("Brave-pilots.ogg");
+        audio.play();
+      }
+      play.addEventListener("click", playMusic);
+    </script>
+  </body>
+</html>

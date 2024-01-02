@@ -1,0 +1,67 @@
+body {
+  background: url("background.avif");
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  background-size: cover;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  margin: 0;
+}
+#game-tittle {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  font-size: 40px;
+  color: #977da1; /* Kolor tytułu */
+  margin-bottom: 10px; /* Dodatkowy odstęp między tytułem a przyciskiem */
+  font-family: "Press Start 2P", cursive;
+  margin-bottom: 200px;
+  animation: changeColor 4s infinite;
+}
+@keyframes changeColor {
+  0% {
+    color: red;
+  }
+  25% {
+    color: blue;
+  }
+  50% {
+    color: green;
+  }
+  75% {
+    color: orange;
+  }
+  100% {
+    color: purple;
+  }
+}
+#start-button-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+#start-button {
+  padding: 15px 60px;
+  background-color: #977da1; /* Kolor tła */
+  color: #d4d4d4; /* Kolor tekstu */
+  border: none;
+  border-bottom: 5px solid #695a68; /* Dolna krawędź jako imitacja cienia */
+  border-left: 5px solid #60505a;
+  border-right: 5px solid #60505a;
+
+  font-size: 24px;
+  text-shadow: 3px 3px 3px rgba(0, 0, 0, 0.5); /* Cień tekstu */
+  cursor: pointer;
+  box-shadow: 3px 3px 3px #3b353a; /* Imitacja cienia od góry */
+  transition: transform 0.2s ease-in-out, box-shadow 0.5s ease-in-out; /* Dodanie efektu przejścia */
+  font-family: "Press Start 2P", cursive;
+  text-rendering: optimizeSpeed;
+}
+
+#start-button:hover {
+  transform: translateY(3px); /* Podniesienie przycisku po najechaniu */
+  box-shadow: none;
+}
