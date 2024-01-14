@@ -2,9 +2,6 @@ window.onload = function () {
   var startButton = document.getElementById("start-button");
   startButton.addEventListener("click", begin);
 
-  var gamePaused = false; // Dodanie zmiennej do śledzenia stanu gry (pauza / niepauza)
-  var gameInterval; // Zmienna do przechowywania interwału animacji gry
-
   function begin() {
     var startScreen = document.getElementById("start-screen");
     startScreen.innerHTML = ""; // Usunięcie zawartości diva startowego
@@ -29,6 +26,7 @@ window.onload = function () {
     c = c.getContext("2d");
 
     function startGame() {
+      var gamePaused = false; // Dodanie zmiennej do śledzenia stanu gry (pauza / niepauza)
       mouse = {
         x: innerWidth / 2,
         y: innerHeight - 33,
@@ -215,61 +213,61 @@ window.onload = function () {
       window.onerror = stoperror;
       window.addEventListener("keydown", function (event) {
         if (event.key === "Escape") {
-          // Jeśli naciśnięty został klawisz Esc
           gamePaused = !gamePaused; // Zmień stan gry (pauza / niepauza)
+
           animate();
         }
       });
 
       function animate() {
         if (!gamePaused) {
-          requestAnimationFrame(animate);
-          c.beginPath();
-          c.clearRect(0, 0, innerWidth, innerHeight);
-          c.fillStyle = "white";
-          c.fillText("Health: " + health, 5, 20);
-          c.fillText("Score: " + score, innerWidth - 100, 20);
+          requestAnimationFrame(animate); // alternatywa dla SetInterval, wywołuję funkcję animate przy każdym odświeżeniu ekranu
+        }
+        c.beginPath();
+        c.clearRect(0, 0, innerWidth, innerHeight);
+        c.fillStyle = "white";
+        c.fillText("Health: " + health, 5, 20);
+        c.fillText("Score: " + score, innerWidth - 100, 20);
 
-          __player.update();
+        __player.update();
 
-          for (var i = 0; i < _bullets.length; i++) {
-            _bullets[i].update();
-            if (_bullets[i].y < 0) {
-              _bullets.splice(i, 1);
+        for (var i = 0; i < _bullets.length; i++) {
+          _bullets[i].update();
+          if (_bullets[i].y < 0) {
+            _bullets.splice(i, 1);
+          }
+        }
+
+        for (var k = 0; k < _enemies.length; k++) {
+          _enemies[k].update();
+          if (_enemies[k].y > innerHeight) {
+            _enemies.splice(k, 1);
+            health -= 10;
+            if (health == 0) {
+              alert("You LOST! \n Your score was " + score);
+              startGame();
             }
           }
+        }
 
-          for (var k = 0; k < _enemies.length; k++) {
-            _enemies[k].update();
-            if (_enemies[k].y > innerHeight) {
-              _enemies.splice(k, 1);
-              health -= 10;
-              if (health == 0) {
-                alert("You LOST! \n Your score was " + score);
-                startGame();
-              }
+        for (var j = _enemies.length - 1; j >= 0; j--) {
+          for (var l = _bullets.length - 1; l >= 0; l--) {
+            if (collision(_enemies[j], _bullets[l])) {
+              _enemies.splice(j, 1);
+              _bullets.splice(l, 1);
+              score++;
             }
           }
-
-          for (var j = _enemies.length - 1; j >= 0; j--) {
-            for (var l = _bullets.length - 1; l >= 0; l--) {
-              if (collision(_enemies[j], _bullets[l])) {
-                _enemies.splice(j, 1);
-                _bullets.splice(l, 1);
-                score++;
-              }
-            }
-          }
-          for (var h = 0; h < _healthkits.length; h++) {
-            _healthkits[h].update();
-          }
-          for (var hh = _healthkits.length - 1; hh >= 0; hh--) {
-            for (var hhh = _bullets.length - 1; hhh >= 0; hhh--) {
-              if (collision(_healthkits[hh], _bullets[hhh])) {
-                _healthkits.splice(hh, 1);
-                _bullets.splice(hhh, 1);
-                health += 10;
-              }
+        }
+        for (var h = 0; h < _healthkits.length; h++) {
+          _healthkits[h].update();
+        }
+        for (var hh = _healthkits.length - 1; hh >= 0; hh--) {
+          for (var hhh = _bullets.length - 1; hhh >= 0; hhh--) {
+            if (collision(_healthkits[hh], _bullets[hhh])) {
+              _healthkits.splice(hh, 1);
+              _bullets.splice(hhh, 1);
+              health += 10;
             }
           }
         }
