@@ -20,13 +20,20 @@
         <button id="start-button">Start Game</button>
       </div>
     </div>
-    <script>
-      let play = document.getElementById("start-button");
-      function playMusic() {
-        let audio = new Audio("Brave-pilots.ogg");
-        audio.play();
-      }
-      play.addEventListener("click", playMusic);
-    </script>
+
+    <div id="game-overlay">
+      <div id="pause-menu">
+        <h2>Pause</h2>
+        <label for="volume-slider">Volume:</label>
+        <input
+          type="range"
+          id="volume-slider"
+          min="0"
+          max="100"
+          step="1"
+          value="50"
+        />
+      </div>
+    </div>
   </body>
 </html>

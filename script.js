@@ -1,7 +1,27 @@
 window.onload = function () {
   var startButton = document.getElementById("start-button");
   startButton.addEventListener("click", begin);
+  var audio;
+  let play = document.getElementById("start-button");
+  function playMusic() {
+    audio = new Audio("Brave-pilots.ogg");
+    audio.play();
+  }
+  play.addEventListener("click", playMusic);
 
+  var volumeSlider = document.getElementById("volume-slider");
+  volumeSlider.addEventListener("input", function () {
+    // Aktualizuj głośność na podstawie wartości suwaka
+    updateVolume(volumeSlider.value);
+  });
+
+  function updateVolume(volume) {
+    if (audio) {
+      // Gwarantuj, że wartość głośności jest w odpowiednim zakresie (0-1)
+      volume = Math.max(0, Math.min(100, volume)) / 100;
+      audio.volume = volume;
+    }
+  }
   function begin() {
     var startScreen = document.getElementById("start-screen");
     startScreen.innerHTML = ""; // Usunięcie zawartości diva startowego
@@ -214,10 +234,21 @@ window.onload = function () {
       window.addEventListener("keydown", function (event) {
         if (event.key === "Escape") {
           gamePaused = !gamePaused; // Zmień stan gry (pauza / niepauza)
-
+          togglePauseMenu();
           animate();
         }
       });
+      function togglePauseMenu() {
+        var gameOverlay = document.getElementById("game-overlay");
+        var pauseMenu = document.getElementById("pause-menu");
+
+        if (gamePaused) {
+          gameOverlay.style.display = "flex";
+          //pauseMenu.innerHTML = "<p>Pause</p>"; //ustawianie zawartości diva w htmlu
+        } else {
+          gameOverlay.style.display = "none";
+        }
+      }
 
       function animate() {
         if (!gamePaused) {
