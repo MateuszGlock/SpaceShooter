@@ -28,8 +28,8 @@ window.onload = function () {
 
     var canvas = document.createElement("canvas");
     canvas.id = "game-canvas";
-    canvas.width = 100; // Dostosuj szerokość canvasa według potrzeb
-    canvas.height = 100; // Dostosuj wysokość canvasa według potrzeb
+    canvas.width = 100;
+    canvas.height = 100;
 
     startScreen.appendChild(canvas);
 
@@ -44,7 +44,6 @@ window.onload = function () {
     c.width = innerWidth;
     c.height = innerHeight;
     c = c.getContext("2d");
-
     function startGame() {
       var gamePaused = false; // Dodanie zmiennej do śledzenia stanu gry (pauza / niepauza)
       mouse = {
@@ -77,6 +76,11 @@ window.onload = function () {
       var score = 0;
       var health = 100;
       playerImg.src = "https://image.ibb.co/dfbD1U/heroShip.png";
+
+      var _stars = [];
+      var star_radius = 1;
+      var star_height = 0;
+      var star_speed = 0.5;
 
       var _bullets = [];
       var bullet_width = 6;
@@ -111,6 +115,25 @@ window.onload = function () {
         };
 
         this.update = function () {
+          this.draw();
+        };
+      }
+
+      function Star(x, y, radius, speed) {
+        this.x = x;
+        this.y = y;
+        this.radius = radius;
+        this.speed = speed;
+
+        this.draw = function () {
+          c.beginPath();
+          c.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false);
+          c.fillStyle = "white";
+          c.fill();
+        };
+
+        this.update = function () {
+          this.y += this.speed;
           this.draw();
         };
       }
@@ -173,6 +196,28 @@ window.onload = function () {
 
       var __player = new Player(mouse.x, mouse.y, player_width, player_height);
 
+      //funkcja spawnująca gwiazdy
+      function drawStars(starting) {
+        for (var _ = 0; _ < 400; _++) {
+          var x = Math.random() * (innerWidth - star_radius);
+          var y;
+          if (starting) {
+            y = Math.random() * innerHeight;
+            console.log("starting stars");
+          } else {
+            y = star_height;
+            _ = _ + 10;
+          }
+          var width = star_radius;
+          var speed = Math.random() * star_speed;
+          var __star = new Star(x, y, width, speed);
+          _stars.push(__star);
+        }
+      }
+      drawStars(true);
+
+      setInterval(drawStars, 2000);
+
       function drawEnemies() {
         for (var _ = 0; _ < 4; _++) {
           var x = Math.random() * (innerWidth - enemy_width);
@@ -184,8 +229,9 @@ window.onload = function () {
           _enemies.push(__enemy);
         }
       }
-      setInterval(drawEnemies, 1234);
-
+      if (!gamePaused) {
+        setInterval(drawEnemies, 1234);
+      }
       function drawHealthkits() {
         for (var _ = 0; _ < 1; _++) {
           var x = Math.random() * (innerWidth - enemy_width);
@@ -262,6 +308,13 @@ window.onload = function () {
 
         __player.update();
 
+        for (var i = 0; i < _stars.length; i++) {
+          _stars[i].update();
+          if (_stars[i].y > innerHeight) {
+            _stars.splice(i, 1);
+          }
+        }
+
         for (var i = 0; i < _bullets.length; i++) {
           _bullets[i].update();
           if (_bullets[i].y < 0) {
@@ -305,6 +358,7 @@ window.onload = function () {
       }
       animate();
     }
+
     startGame();
   }
 };
