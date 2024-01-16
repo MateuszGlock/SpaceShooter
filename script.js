@@ -198,69 +198,74 @@ window.onload = function () {
 
       //funkcja spawnująca gwiazdy
       function drawStars(starting) {
-        for (var _ = 0; _ < 400; _++) {
-          var x = Math.random() * (innerWidth - star_radius);
-          var y;
-          if (starting) {
-            y = Math.random() * innerHeight;
-            console.log("starting stars");
-          } else {
-            y = star_height;
-            _ = _ + 10;
+        if (!gamePaused) {
+          for (var _ = 0; _ < 400; _++) {
+            var x = Math.random() * (innerWidth - star_radius);
+            var y;
+            if (starting) {
+              y = Math.random() * innerHeight;
+              console.log("starting stars");
+            } else {
+              y = star_height;
+              _ = _ + 10;
+            }
+            var width = star_radius;
+            var speed = Math.random() * star_speed;
+            var __star = new Star(x, y, width, speed);
+            _stars.push(__star);
           }
-          var width = star_radius;
-          var speed = Math.random() * star_speed;
-          var __star = new Star(x, y, width, speed);
-          _stars.push(__star);
         }
       }
       drawStars(true);
-
       setInterval(drawStars, 2000);
 
       function drawEnemies() {
-        for (var _ = 0; _ < 4; _++) {
-          var x = Math.random() * (innerWidth - enemy_width);
-          var y = -enemy_height;
-          var width = enemy_width;
-          var height = enemy_height;
-          var speed = Math.random() * 2;
-          var __enemy = new Enemy(x, y, width, height, speed);
-          _enemies.push(__enemy);
+        if (!gamePaused) {
+          for (var _ = 0; _ < 4; _++) {
+            var x = Math.random() * (innerWidth - enemy_width);
+            var y = -enemy_height;
+            var width = enemy_width;
+            var height = enemy_height;
+            var speed = Math.random() * 2;
+            var __enemy = new Enemy(x, y, width, height, speed);
+            _enemies.push(__enemy);
+          }
         }
       }
-      if (!gamePaused) {
-        setInterval(drawEnemies, 1234);
-      }
+      setInterval(drawEnemies, 1234);
+
       function drawHealthkits() {
-        for (var _ = 0; _ < 1; _++) {
-          var x = Math.random() * (innerWidth - enemy_width);
-          var y = -enemy_height;
-          var width = healthkit_width;
-          var height = healthkit_height;
-          var speed = Math.random() * 2.6;
-          var __healthkit = new Healthkit(x, y, width, height, speed);
-          _healthkits.push(__healthkit);
+        if (!gamePaused) {
+          for (var _ = 0; _ < 1; _++) {
+            var x = Math.random() * (innerWidth - enemy_width);
+            var y = -enemy_height;
+            var width = healthkit_width;
+            var height = healthkit_height;
+            var speed = Math.random() * 2.6;
+            var __healthkit = new Healthkit(x, y, width, height, speed);
+            _healthkits.push(__healthkit);
+          }
         }
       }
       setInterval(drawHealthkits, 15000);
 
       function fire() {
-        for (var _ = 0; _ < 1; _++) {
-          var x = mouse.x - bullet_width / 2;
-          var y = mouse.y - player_height;
-          var __bullet = new Bullet(
-            x,
-            y,
-            bullet_width,
-            bullet_height,
-            bullet_speed
-          );
-          _bullets.push(__bullet);
+        if (!gamePaused) {
+          for (var _ = 0; _ < 1; _++) {
+            var x = mouse.x - bullet_width / 2;
+            var y = mouse.y - player_height;
+            var __bullet = new Bullet(
+              x,
+              y,
+              bullet_width,
+              bullet_height,
+              bullet_speed
+            );
+            _bullets.push(__bullet);
+          }
         }
       }
       setInterval(fire, 200);
-
       canvas.addEventListener("click", function () {});
 
       function collision(a, b) {
