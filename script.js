@@ -70,12 +70,12 @@ window.onload = function () {
         mouse.x = touchX;
         mouse.y = touchY;
       });
-      var player_width = 32;
-      var player_height = 32;
+      var player_width = 16;
+      var player_height = 16;
       var playerImg = new Image();
       var score = 0;
       var health = 100;
-      playerImg.src = "https://image.ibb.co/dfbD1U/heroShip.png";
+      playerImg.src = "SpaceShip.png";
 
       var _stars = [];
       var star_radius = 1;
@@ -89,15 +89,15 @@ window.onload = function () {
 
       var _enemies = [];
       var enemyImg = new Image();
-      enemyImg.src = "https://i.ibb.co/0YgHvmx/enemy-fotor-20230927153748.png";
-      var enemy_width = 32;
-      var enemy_height = 32;
+      enemyImg.src = "Alien_ship.png";
+      var enemy_width = 38; //w rzeczywistości sprite wynosi 38 pixeli
+      var enemy_height = 38;
 
       var _healthkits = [];
       var healthkitImg = new Image();
-      healthkitImg.src = "https://image.ibb.co/gFvSEU/first_aid_kit.png";
-      var healthkit_width = 32;
-      var healthkit_height = 32;
+      healthkitImg.src = "HealthStar.png";
+      var healthkit_width = 28;
+      var healthkit_height = 28;
 
       function Player(x, y, width, height) {
         this.x = x;
@@ -167,7 +167,7 @@ window.onload = function () {
 
         this.draw = function () {
           c.beginPath();
-          c.drawImage(enemyImg, this.x, this.y);
+          c.drawImage(enemyImg, this.x - enemy_width / 10, this.y); //wyrównanie x przez width, bo jest trochę enemy sprite jest trochę krzywo nakładany
         };
 
         this.update = function () {
@@ -185,7 +185,7 @@ window.onload = function () {
 
         this.draw = function () {
           c.beginPath();
-          c.drawImage(healthkitImg, this.x, this.y);
+          c.drawImage(healthkitImg, this.x - healthkit_width / 10, this.y);
         };
 
         this.update = function () {
@@ -252,7 +252,7 @@ window.onload = function () {
       function fire() {
         if (!gamePaused) {
           for (var _ = 0; _ < 1; _++) {
-            var x = mouse.x - bullet_width / 2;
+            var x = mouse.x + player_width / 2 - bullet_width / 2;
             var y = mouse.y - player_height;
             var __bullet = new Bullet(
               x,
