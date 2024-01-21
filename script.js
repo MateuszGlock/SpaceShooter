@@ -5,6 +5,7 @@ window.onload = function () {
   let play = document.getElementById("start-button");
   function playMusic() {
     audio = new Audio("Brave-pilots.ogg");
+    audio.loop = true;
     audio.play();
   }
   play.addEventListener("click", playMusic);
@@ -74,6 +75,8 @@ window.onload = function () {
       var player_height = 16;
       var playerImg = new Image();
       var score = 0;
+      var gears = 0;
+      var difficultyLevel = 1;
       var health = 100;
       playerImg.src = "SpaceShip.png";
 
@@ -99,6 +102,13 @@ window.onload = function () {
       var healthkit_width = 28;
       var healthkit_height = 28;
 
+      var _gears = [];
+      var gearImg = new Image();
+      gearImg.src = "Gear.png";
+      var gear_width = 28;
+      var gear_height = 28;
+      // var gear_speed;
+
       function Player(x, y, width, height) {
         this.x = x;
         this.y = y;
@@ -115,6 +125,7 @@ window.onload = function () {
         };
 
         this.update = function () {
+          this.x = mouse.x - player_width;
           this.draw();
         };
       }
@@ -194,6 +205,24 @@ window.onload = function () {
         };
       }
 
+      function Gear(x, y, width, height, speed) {
+        this.x = x;
+        this.y = y;
+        this.width = width;
+        this.height = height;
+        this.speed = speed;
+
+        this.draw = function () {
+          c.beginPath();
+          c.drawImage(gearImg, this.x - gear_width / 10, this.y); //wyrównanie x przez width, bo jest trochę enemy sprite jest trochę krzywo nakładany
+        };
+
+        this.update = function () {
+          this.y += this.speed;
+          this.draw();
+        };
+      }
+
       var __player = new Player(mouse.x, mouse.y, player_width, player_height);
 
       //funkcja spawnująca gwiazdy
@@ -204,7 +233,7 @@ window.onload = function () {
             var y;
             if (starting) {
               y = Math.random() * innerHeight;
-              console.log("starting stars");
+              // console.log("starting stars");
             } else {
               y = star_height;
               _ = _ + 10;
@@ -219,9 +248,16 @@ window.onload = function () {
       drawStars(true);
       setInterval(drawStars, 2000);
 
+      function updateDifficultyLevel(score) {
+        if (score % (25 * Math.pow(difficultyLevel, 2)) === 0) {
+          difficultyLevel++;
+          //  console.log("Level up! Difficulty increased to " + difficultyLevel);
+          //showOverlay();
+        }
+      }
       function drawEnemies() {
         if (!gamePaused) {
-          for (var _ = 0; _ < 4; _++) {
+          for (var _ = 0; _ < difficultyLevel; _++) {
             var x = Math.random() * (innerWidth - enemy_width);
             var y = -enemy_height;
             var width = enemy_width;
@@ -263,10 +299,34 @@ window.onload = function () {
             );
             _bullets.push(__bullet);
           }
+          // console.log(__player.x);
         }
       }
-      setInterval(fire, 200);
-      canvas.addEventListener("click", function () {});
+      canvas.addEventListener("click", function () {
+        fire();
+      });
+      // canvas.addEventListener("click", function () {}); - nie wiem czy to po coś tu było, ale zostawiam w kom żeby nie zepsuć xD
+
+      function drawGears(x, y, speed) {
+        var width = gear_width;
+        var height = gear_height;
+        var speed = speed;
+        var __gear = new Gear(x, y, width, height, speed);
+        _gears.push(__gear);
+      }
+
+      function killEnemy(enemyNumber) {
+        // console.log(enemyNumber);
+        if (Math.random() < 0.2) {
+          drawGears(
+            _enemies[enemyNumber].x,
+            _enemies[enemyNumber].y,
+            _enemies[enemyNumber].speed
+          );
+          // console.log("Gear");
+        }
+        _enemies.splice(enemyNumber, 1);
+      }
 
       function collision(a, b) {
         return (
@@ -276,7 +336,7 @@ window.onload = function () {
           a.y + a.height > b.y
         );
       }
-      c.font = "1em Arial";
+      //  c.font = "1em Arial"; // po cholerę ta linijka?
 
       function stoperror() {
         return true;
@@ -291,14 +351,25 @@ window.onload = function () {
       });
       function togglePauseMenu() {
         var gameOverlay = document.getElementById("game-overlay");
-        var pauseMenu = document.getElementById("pause-menu");
+        //var pauseMenu = document.getElementById("pause-menu"); nieaktualna zmienna
 
         if (gamePaused) {
           gameOverlay.style.display = "flex";
-          //pauseMenu.innerHTML = "<p>Pause</p>"; //ustawianie zawartości diva w htmlu
+          //pauseMenu.innerHTML = "<p>Pause</p>"; //ustawianie zawartości diva w htmlu - nie działa bo przykrywa suwak głośności
         } else {
           gameOverlay.style.display = "none";
         }
+      }
+
+      function showOverlay() {
+        var overlay = document.getElementById("overlay");
+        overlay.style.display = "flex";
+        overlay.style.background = "rgba(0, 0, 0, 0.5)"; // Zaciemnienie z alpha 0.5
+      }
+
+      function hideOverlay() {
+        var overlay = document.getElementById("overlay");
+        overlay.style.background = "rgba(0, 0, 0, 0)"; // Transparentne tło
       }
 
       function animate() {
@@ -308,8 +379,10 @@ window.onload = function () {
         c.beginPath();
         c.clearRect(0, 0, innerWidth, innerHeight);
         c.fillStyle = "white";
-        c.fillText("Health: " + health, 5, 20);
-        c.fillText("Score: " + score, innerWidth - 100, 20);
+        c.font = "1em 'Press Start 2P'";
+        c.fillText("Health: " + health, 15, 25);
+        c.fillText("Score: " + score, 15, 45);
+        c.fillText("Gears: " + gears, 15, 65);
 
         __player.update();
 
@@ -338,13 +411,20 @@ window.onload = function () {
             }
           }
         }
+        for (var g = 0; g < _gears.length; g++) {
+          _gears[g].update();
+          if (_gears[g].y > innerHeight) {
+            _gears.splice(g, 1);
+          }
+        }
 
         for (var j = _enemies.length - 1; j >= 0; j--) {
           for (var l = _bullets.length - 1; l >= 0; l--) {
             if (collision(_enemies[j], _bullets[l])) {
-              _enemies.splice(j, 1);
+              killEnemy(j);
               _bullets.splice(l, 1);
               score++;
+              updateDifficultyLevel(score);
             }
           }
         }
@@ -357,6 +437,19 @@ window.onload = function () {
               _healthkits.splice(hh, 1);
               _bullets.splice(hhh, 1);
               health += 10;
+            }
+          }
+        }
+        for (var gg = _gears.length - 1; gg >= 0; gg--) {
+          if (collision(__player, _gears[gg])) {
+            _gears.splice(gg, 1);
+            gears += 1;
+            //console.log("gear collected");
+          }
+          for (var ggg = _bullets.length - 1; ggg >= 0; ggg--) {
+            if (collision(_gears[gg], _bullets[ggg])) {
+              _gears.splice(gg, 1);
+              _bullets.splice(ggg, 1); //dodać animację niszczenia zębatek
             }
           }
         }

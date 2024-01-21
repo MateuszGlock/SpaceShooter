@@ -109,3 +109,15 @@ body {
   border-radius: 50%; /* Zakrąglenie rogów kciuka */
   cursor: pointer; /* Zmiana kursora na pointer */
 }
+/*style zaciemnienia menu ulepszeń*/
+#overlay {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0); /* Transparentne tło */
+  z-index: 999; /* Wysoki indeks, aby pokryć całą stronę */
+  transition: background 0.5s; /* Animacja zmiany koloru tła */
+}
