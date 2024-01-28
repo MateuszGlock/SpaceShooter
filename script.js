@@ -126,6 +126,7 @@ window.onload = function () {
 
         this.update = function () {
           this.x = mouse.x - player_width;
+          this.y = mouse.y - player_height;
           this.draw();
         };
       }
