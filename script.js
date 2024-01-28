@@ -6,6 +6,7 @@ window.onload = function () {
   function playMusic() {
     audio = new Audio("Brave-pilots.ogg");
     audio.loop = true;
+    audio.volume = 0.1;
     audio.play();
   }
   play.addEventListener("click", playMusic);
@@ -47,6 +48,20 @@ window.onload = function () {
     c = c.getContext("2d");
     function startGame() {
       var gamePaused = false; // Dodanie zmiennej do śledzenia stanu gry (pauza / niepauza)
+      var upgradesMenuOpen = false; //Czy włączone jest menu ulepszeń?
+      var gameOverlayed = false; // czy gra jest przykryta - do sprawdzenie czy dwie powyższe zmienne są konieczne
+      var bulletCooldown = 1000; // Czas trwania cooldownu w milisekundach
+      var lastShotTime = 0; // Czas ostatniego strzału
+      var currentTime = 0; // Czas bieżący
+      var spaceShipGunUpgradeLevel = 0; // poziom ulepszenia broni
+
+      const upgradesData = {
+        spaceShipGunUpgrade: { name: "Space Ship Gun Upgrade", cost: 5 },
+        enginesUpgrade: { name: "Engines Upgrade", cost: 15 },
+        ShieldUpgrade: { name: "Shield Upgrade", cost: 10 },
+        // Dodaj więcej opcji ulepszeń według potrzeb
+      };
+
       mouse = {
         x: innerWidth / 2,
         y: innerHeight - 33,
@@ -71,6 +86,8 @@ window.onload = function () {
         mouse.x = touchX;
         mouse.y = touchY;
       });
+      var increasedDifficulty = false;
+
       var player_width = 16;
       var player_height = 16;
       var playerImg = new Image();
@@ -251,25 +268,28 @@ window.onload = function () {
 
       function updateDifficultyLevel(score) {
         if (score % (25 * Math.pow(difficultyLevel, 2)) === 0) {
+          increasedDifficulty = true;
           difficultyLevel++;
-          //  console.log("Level up! Difficulty increased to " + difficultyLevel);
-          //showOverlay();
+
+          setTimeout(function () {
+            increasedDifficulty = false;
+          }, 10000);
         }
       }
       function drawEnemies() {
-        if (!gamePaused) {
+        if (!gamePaused && !increasedDifficulty) {
           for (var _ = 0; _ < difficultyLevel; _++) {
             var x = Math.random() * (innerWidth - enemy_width);
             var y = -enemy_height;
             var width = enemy_width;
             var height = enemy_height;
-            var speed = Math.random() * 2;
+            var speed = Math.random() * 1.6 + 0.4;
             var __enemy = new Enemy(x, y, width, height, speed);
             _enemies.push(__enemy);
           }
         }
       }
-      setInterval(drawEnemies, 1234);
+      setInterval(drawEnemies, 1400);
 
       function drawHealthkits() {
         if (!gamePaused) {
@@ -288,19 +308,22 @@ window.onload = function () {
 
       function fire() {
         if (!gamePaused) {
-          for (var _ = 0; _ < 1; _++) {
-            var x = mouse.x + player_width / 2 - bullet_width / 2;
-            var y = mouse.y - player_height;
-            var __bullet = new Bullet(
-              x,
-              y,
-              bullet_width,
-              bullet_height,
-              bullet_speed
-            );
-            _bullets.push(__bullet);
+          currentTime = Date.now();
+          if (currentTime - lastShotTime > bulletCooldown) {
+            for (var _ = 0; _ < 1; _++) {
+              var x = mouse.x + player_width / 2 - bullet_width / 2;
+              var y = mouse.y - player_height;
+              var __bullet = new Bullet(
+                x,
+                y,
+                bullet_width,
+                bullet_height,
+                bullet_speed
+              );
+              _bullets.push(__bullet);
+              lastShotTime = currentTime; // Zaktualizuj czas ostatniego strzału
+            }
           }
-          // console.log(__player.x);
         }
       }
       canvas.addEventListener("click", function () {
@@ -345,11 +368,153 @@ window.onload = function () {
       window.onerror = stoperror;
       window.addEventListener("keydown", function (event) {
         if (event.key === "Escape") {
-          gamePaused = !gamePaused; // Zmień stan gry (pauza / niepauza)
-          togglePauseMenu();
-          animate();
+          // Zmień stan gry (pauza / niepauza)
+          toggleOverlay("pauseMenu");
+        }
+        if (event.key === "e") {
+          // Otwórz lub zamknij menu ulepszeń po naciśnięciu klawisza "e"
+          toggleOverlay("upgradeMenu");
         }
       });
+      function toggleOverlay(overlayType) {
+        var gameOverlay = document.getElementById("game-overlay");
+        var pauseMenu = document.getElementById("pause-menu");
+        var upgradeMenu = document.getElementById("upgrades-menu");
+
+        // Wyłącz wszystkie dzieci gameOverlay
+        for (var i = 0; i < gameOverlay.children.length; i++) {
+          gameOverlay.children[i].style.display = "none";
+        }
+
+        // Sprawdź typ overlaya
+        switch (overlayType) {
+          case "pauseMenu":
+            if (gamePaused) {
+              // Pauza jest włączona, więc wyłącz pauzę i odpauzuj grę
+              gamePaused = false;
+              animate();
+              gameOverlayed = false;
+              console.log("Pauza OFF");
+              gameOverlay.style.display = "none";
+              pauseMenu.style.display = "none";
+            } else if (upgradesMenuOpen) {
+              // Pauza jest wyłączona, ale menu upgradów jest otwarte
+              gamePaused = true;
+              upgradesMenuOpen = false;
+              upgradeMenu.style.display = "none";
+              pauseMenu.style.display = "block";
+              console.log("Pauza z upgradów");
+            } else {
+              // Żaden overlay nie jest otwarty, więc włącz pauzę
+              gameOverlayed = true;
+              gamePaused = true;
+              console.log("Pauza ON");
+              gameOverlay.style.display = "flex";
+              pauseMenu.style.display = "block";
+            }
+            break;
+          case "upgradeMenu":
+            if (gamePaused) {
+              // Pauza jest włączona, więc wyłącz pauzę i odpauzuj grę
+              gamePaused = false;
+              animate();
+              gameOverlayed = true;
+              upgradesMenuOpen = true;
+              console.log("Pauza w upgrady");
+              pauseMenu.style.display = "none";
+              upgradeMenu.style.display = "flex";
+            } else if (upgradesMenuOpen) {
+              // Pauza jest wyłączona, ale menu upgradów jest otwarte
+
+              // gameOverlayed = false;
+              upgradesMenuOpen = false;
+              console.log(upgradeMenu);
+              upgradeMenu.style.display = "none";
+              console.log("upgrades OFF");
+              gameOverlay.style.display = "none";
+            } else {
+              // Żaden overlay nie jest otwarty, więc menu upgradów
+              gameOverlayed = true;
+              gamePaused = false;
+              upgradesMenuOpen = true;
+              console.log("upgrades ON");
+              gameOverlay.style.display = "flex";
+              upgradeMenu.style.display = "block";
+              generateUpgradeTiles();
+            }
+            break;
+          default:
+            console.error("Nieznany typ overlaya:", overlayType);
+        }
+      }
+      // Funkcja do generowania kafelków z opcjami ulepszeń
+      function generateUpgradeTiles() {
+        // Lista ulepszeń
+        const upgradesList = document.getElementById("upgrades-list");
+
+        // Usuń istniejące kafelki, jeśli istnieją
+        upgradesList.innerHTML = "";
+
+        // Tworzenie kafelków z opcjami ulepszeń
+        Object.keys(upgradesData).forEach((upgradeKey) => {
+          const upgrade = upgradesData[upgradeKey];
+          const upgradeTile = document.createElement("li");
+
+          const upgradeName = document.createElement("span");
+          upgradeName.textContent = upgrade.name;
+
+          const upgradeCost = document.createElement("span");
+          upgradeCost.textContent = `Cost: ${upgrade.cost}`;
+
+          const upgradeButton = document.createElement("button");
+          upgradeButton.textContent = "Buy";
+          upgradeButton.classList.add("upgrade-button");
+          upgradeButton.addEventListener("click", () => {
+            // Tutaj dodaj logikę zakupu ulepszenia
+            handleUpgradePurchase(upgradeKey);
+            // Po zakupie, ponownie generuj kafelki
+            generateUpgradeTiles();
+          });
+
+          upgradeTile.appendChild(upgradeName);
+          upgradeTile.appendChild(upgradeCost);
+          upgradeTile.appendChild(upgradeButton);
+
+          upgradesList.appendChild(upgradeTile);
+        });
+
+        /* const upgradeButton = document.createElement("button");
+        upgradeButton.textContent = "Buy";
+        upgradeButton.addEventListener("click", () => {
+          // Tutaj dodaj logikę zakupu ulepszenia
+          handleUpgradePurchase(upgradeKey);
+          // Po zakupie, ponownie generuj kafelki
+          generateUpgradeTiles();
+        });*/
+      }
+      function handleUpgradePurchase(upgrade) {
+        switch (upgrade) {
+          case "spaceShipGunUpgrade":
+            if (gears >= upgradesData.spaceShipGunUpgrade.cost) {
+              gears -= upgradesData.spaceShipGunUpgrade.cost;
+              spaceShipGunUpgradeLevel++;
+              bulletCooldown = 1000 / (spaceShipGunUpgradeLevel + 1);
+              console.log(
+                "Space Ship Gun Upgrade purchased! Cooldown reduced."
+              );
+            } else {
+              console.log(
+                "Not enough gears to purchase Space Ship Gun Upgrade!"
+              );
+            }
+            break;
+          // Dodaj obsługę innych ulepszeń według potrzeb
+        }
+      }
+
+      /*function ShowOverlay() {
+        var gameOverlay = document.getElementById("game-overlay");
+      }
       function togglePauseMenu() {
         var gameOverlay = document.getElementById("game-overlay");
         //var pauseMenu = document.getElementById("pause-menu"); nieaktualna zmienna
@@ -361,8 +526,16 @@ window.onload = function () {
           gameOverlay.style.display = "none";
         }
       }
+      function toggleUpgradesMenu() {
+        var upgradeOverlay = document.getElementById("upgrades-menu");
+        if (upgradesMenuOpen) {
+          upgradeOverlay.style.display = "flex";
+        } else {
+          upgradeOverlay.style.display = "none";
+        }
+      }
 
-      function showOverlay() {
+      /*  function showOverlay() {
         var overlay = document.getElementById("overlay");
         overlay.style.display = "flex";
         overlay.style.background = "rgba(0, 0, 0, 0.5)"; // Zaciemnienie z alpha 0.5
@@ -371,7 +544,7 @@ window.onload = function () {
       function hideOverlay() {
         var overlay = document.getElementById("overlay");
         overlay.style.background = "rgba(0, 0, 0, 0)"; // Transparentne tło
-      }
+      } To jakieś stare próby, w ogóle do kosza z tym*/
 
       function animate() {
         if (!gamePaused) {

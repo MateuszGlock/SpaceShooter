@@ -9,6 +9,7 @@ body {
   align-items: center;
   height: 100vh;
   margin: 0;
+  font-family: "Press Start 2P";
 }
 #game-tittle {
   display: flex;
@@ -83,10 +84,10 @@ body {
 }
 
 #pause-menu {
+  display: none;
   background: rgba(0, 0, 0, 0.9);
   padding: 20px;
   border-radius: 10px;
-  font-family: "Press Start 2P";
 }
 #volume-slider {
   appearance: none; /* Usunięcie domyślnego wyglądu WebKit */
@@ -110,14 +111,45 @@ body {
   cursor: pointer; /* Zmiana kursora na pointer */
 }
 /*style zaciemnienia menu ulepszeń*/
-#overlay {
+
+#upgrapes-menu {
   display: none;
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0); /* Transparentne tło */
-  z-index: 999; /* Wysoki indeks, aby pokryć całą stronę */
-  transition: background 0.5s; /* Animacja zmiany koloru tła */
+  background: rgba(0, 0, 0, 0.9);
+  padding: 20px;
+  border-radius: 10px;
+}
+#upgrades-list {
+  margin-top: 100px;
+  list-style-type: none;
+  padding: 0;
+}
+#upgrades-list li {
+  margin-bottom: 70px; /* Dostosuj wielkość marginesu według potrzeb */
+}
+
+/* Dodaj styl do przycisków kupna */
+#upgrades-list li button {
+  margin-left: 10px; /* Odstęp między przyciskami, jeśli są obok siebie */
+}
+#upgrades-list li span {
+  font-size: 50%;
+}
+
+/* Styl retro dla przycisku zakupu ulepszeń */
+.upgrade-button {
+  padding: 10px 20px;
+  font-size: 16px;
+  cursor: pointer;
+  background-color: #ffcc00; /* Żółty kolor tła */
+  color: #333; /* Ciemny kolor tekstu */
+  border: 2px solid #333; /* Ciemna obwódka */
+  border-radius: 5px;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5); /* Cień tekstu */
+  box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3); /* Cień przycisku */
+  transition: background-color 0.3s, color 0.3s;
+}
+
+.upgrade-button:hover {
+  background-color: #cc9900; /* Żółty kolor tła po najechaniu myszką */
+  color: #fff; /* Biały kolor tekstu po najechaniu myszką */
 }
