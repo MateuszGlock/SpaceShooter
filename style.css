@@ -244,3 +244,35 @@ body {
   height: 50px; /* Dostosuj wysokość ikonki statku według potrzeb */
   margin-top: 10px; /* Dodatkowy margines od góry, aby oddzielić od tekstu */
 }
+.shoot-button {
+  background-color: #95a5a6; /* Szary kolor przycisku */
+  border: 4px solid #78c9e3; /* Błękitna obramówka */
+  border-radius: 50%;
+  width: 60px;
+  height: 60px;
+  cursor: pointer;
+  margin-bottom: 20px; /* Dodatkowy margines na dole */
+}
+
+.shoot-button.cooldown {
+  animation: cooldownAnimation 1s linear forwards,
+    fadeInAnimation 0.5s linear forwards;
+}
+
+@keyframes cooldownAnimation {
+  0% {
+    border: 4px solid #3498db; /* Zwiększona grubość obramówki */
+  }
+  100% {
+    border: 4px solid transparent; /* Przejście do przezroczystej obramówki */
+  }
+}
+
+@keyframes fadeInAnimation {
+  0% {
+    border: 0px solid transparent; /* Brak obramówki na początku */
+  }
+  100% {
+    border: 4px solid #3498db; /* Zwiększona grubość obramówki na końcu */
+  }
+}

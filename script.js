@@ -55,26 +55,18 @@ window.onload = function () {
 
     startScreen.appendChild(canvas);
 
+    var isTouchDevice = "ontouchstart" in document.documentElement;
+
     var shootButton = document.createElement("button");
     shootButton.id = "shoot-button";
-    shootButton.textContent = "Shoot";
+    shootButton.classList.add("shoot-button");
     if (isTouchDevice) {
       startScreen.appendChild(shootButton);
     }
-    var shootButtonStyle = shootButton.style;
-    shootButtonStyle.width = "50px";
-    shootButtonStyle.height = "50px";
-    shootButtonStyle.backgroundColor = "#3498db";
-    shootButtonStyle.color = "#fff";
-    shootButtonStyle.border = "none";
-    shootButtonStyle.borderRadius = "50%";
-    shootButtonStyle.fontSize = "16px";
-    shootButtonStyle.cursor = "pointer";
 
-    var isTouchDevice = "ontouchstart" in document.documentElement;
-    if (isTouchDevice) {
-      shootButton.addEventListener("click", fire);
-    }
+    // if (isTouchDevice) {
+    //  shootButton.addEventListener("click", fire);
+    // }
     // Tutaj można umieścić resztę kodu gry, który byłby wywoływany po kliknięciu przycisku
     // Możesz przenieść kod tworzenia gry tutaj
     // ...
@@ -379,10 +371,26 @@ window.onload = function () {
               );
               _bullets.push(__bullet);
               lastShotTime = currentTime; // Zaktualizuj czas ostatniego strzału
+              updateShootButtonState();
             }
           }
         }
       }
+
+      function updateShootButtonState() {
+        // Jeśli cooldown jest aktywny, dodaj klasę "cooldown" do przycisku
+        if (currentTime - lastShotTime < bulletCooldown) {
+          shootButton.classList.add("cooldown");
+        } else {
+          // Jeśli cooldown nie jest aktywny, usuń klasę "cooldown"
+          shootButton.classList.remove("cooldown");
+        }
+      }
+      shootButton.addEventListener("click", fire);
+      shootButton.addEventListener("animationend", function () {
+        // Usunięcie klasy cooldown po zakończeniu animacji
+        shootButton.classList.remove("cooldown");
+      });
       canvas.addEventListener("click", function () {
         fire();
       });
