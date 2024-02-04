@@ -55,6 +55,26 @@ window.onload = function () {
 
     startScreen.appendChild(canvas);
 
+    var shootButton = document.createElement("button");
+    shootButton.id = "shoot-button";
+    shootButton.textContent = "Shoot";
+    if (isTouchDevice) {
+      startScreen.appendChild(shootButton);
+    }
+    var shootButtonStyle = shootButton.style;
+    shootButtonStyle.width = "50px";
+    shootButtonStyle.height = "50px";
+    shootButtonStyle.backgroundColor = "#3498db";
+    shootButtonStyle.color = "#fff";
+    shootButtonStyle.border = "none";
+    shootButtonStyle.borderRadius = "50%";
+    shootButtonStyle.fontSize = "16px";
+    shootButtonStyle.cursor = "pointer";
+
+    var isTouchDevice = "ontouchstart" in document.documentElement;
+    if (isTouchDevice) {
+      shootButton.addEventListener("click", fire);
+    }
     // Tutaj można umieścić resztę kodu gry, który byłby wywoływany po kliknięciu przycisku
     // Możesz przenieść kod tworzenia gry tutaj
     // ...
