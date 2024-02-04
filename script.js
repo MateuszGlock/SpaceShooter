@@ -103,10 +103,10 @@ window.onload = function () {
         var root = document.documentElement;
         var touch = event.changedTouches[0];
         var touchX = parseInt(touch.clientX);
-        var touchY = parseInt(touch.clientY) - rect.top - root.scrollTop;
+        //var touchY = parseInt(touch.clientY) - rect.top - root.scrollTop;
         event.preventDefault();
         mouse.x = touchX;
-        mouse.y = touchY;
+        //mouse.y = touchY;
       });
       var increasedDifficulty = false;
 
@@ -115,7 +115,7 @@ window.onload = function () {
       var player_speed = 0.02;
       var playerImg = new Image();
       var score = 0;
-      var gears = 100;
+      var gears = 0;
       var difficultyLevel = 1;
       var health = 100;
       playerImg.src = "SpaceShip.png";
