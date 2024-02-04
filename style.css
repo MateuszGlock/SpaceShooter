@@ -45,6 +45,12 @@ body {
   justify-content: center;
   align-items: center;
 }
+#tutorial-button-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 20px;
+}
 #start-button {
   padding: 15px 60px;
   background-color: #977da1; /* Kolor tła */
@@ -67,7 +73,27 @@ body {
   transform: translateY(3px); /* Podniesienie przycisku po najechaniu */
   box-shadow: none;
 }
+#tutorial-button {
+  padding: 15px 60px;
+  background-color: #977da1; /* Kolor tła */
+  color: #d4d4d4; /* Kolor tekstu */
+  border: none;
+  border-bottom: 5px solid #695a68; /* Dolna krawędź jako imitacja cienia */
+  border-left: 5px solid #60505a;
+  border-right: 5px solid #60505a;
 
+  font-size: 24px;
+  text-shadow: 3px 3px 3px rgba(0, 0, 0, 0.5); /* Cień tekstu */
+  cursor: pointer;
+  box-shadow: 3px 3px 3px #3b353a; /* Imitacja cienia od góry */
+  transition: transform 0.2s ease-in-out, box-shadow 0.5s ease-in-out; /* Dodanie efektu przejścia */
+  font-family: "Press Start 2P", cursive;
+  text-rendering: optimizeSpeed;
+}
+#tutorial-button:hover {
+  transform: translateY(3px); /* Podniesienie przycisku po najechaniu */
+  box-shadow: none;
+}
 #game-overlay {
   display: none;
   position: fixed;
@@ -112,7 +138,7 @@ body {
 }
 /*style zaciemnienia menu ulepszeń*/
 
-#upgrapes-menu {
+#upgrades-menu {
   display: none;
   background: rgba(0, 0, 0, 0.9);
   padding: 20px;
@@ -152,4 +178,69 @@ body {
 .upgrade-button:hover {
   background-color: #cc9900; /* Żółty kolor tła po najechaniu myszką */
   color: #fff; /* Biały kolor tekstu po najechaniu myszką */
+}
+
+.modal {
+  display: none;
+  position: fixed;
+  z-index: 1;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+  margin: auto;
+  margin-top: 50px;
+  background-color: rgba(0, 0, 0, 0.5);
+}
+
+.modal-content {
+  background-color: #272e31;
+  color: white;
+  margin: 20px auto;
+  padding: 20px;
+  border: 1px solid #888;
+  width: 70%;
+  height: 70%;
+  overflow: auto;
+}
+
+.close {
+  color: #aaa;
+  float: right;
+  font-size: 28px;
+  font-weight: bold;
+}
+
+.close:hover,
+.close:focus {
+  color: black;
+  text-decoration: none;
+  cursor: pointer;
+}
+#close-button-container {
+  display: flex;
+  justify-content: end;
+  align-items: end;
+}
+.close-button {
+  background: none;
+  border: none;
+  color: gray; /* Kolor czerwony */
+  font-size: 24px; /* Rozmiar czcionki */
+  font-weight: bold; /* Pogrubienie tekstu */
+  top: 10px;
+  right: 10px;
+  font-family: "Press Start 2P";
+  cursor: pointer;
+  text-align: end;
+}
+
+.close-button:hover {
+  color: white; /* Kolor czerwony po najechaniu */
+}
+.ship-icon {
+  width: 50px; /* Dostosuj szerokość ikonki statku według potrzeb */
+  height: 50px; /* Dostosuj wysokość ikonki statku według potrzeb */
+  margin-top: 10px; /* Dodatkowy margines od góry, aby oddzielić od tekstu */
 }

@@ -9,6 +9,12 @@ window.onload = function () {
     audio.volume = 0.1;
     audio.play();
   }
+  var tutorialButton = document.getElementById("tutorial-button");
+  tutorialButton.addEventListener("click", toggleTutorialModal);
+
+  var closeButton = document.getElementById("close-button");
+  closeButton.addEventListener("click", closeTutorialModal);
+
   play.addEventListener("click", playMusic);
 
   var volumeSlider = document.getElementById("volume-slider");
@@ -24,6 +30,20 @@ window.onload = function () {
       audio.volume = volume;
     }
   }
+  var tutorialButton = document.getElementById("tutorial-button");
+  tutorialButton.addEventListener("click", toggleTutorialModal);
+
+  function toggleTutorialModal() {
+    var tutorialModal = document.getElementById("tutorial-modal");
+    tutorialModal.style.display = "flex";
+  }
+
+  function closeTutorialModal() {
+    var tutorialModal = document.getElementById("tutorial-modal");
+
+    tutorialModal.style.display = "none";
+  }
+
   function begin() {
     var startScreen = document.getElementById("start-screen");
     startScreen.innerHTML = ""; // Usunięcie zawartości diva startowego
@@ -54,11 +74,13 @@ window.onload = function () {
       var lastShotTime = 0; // Czas ostatniego strzału
       var currentTime = 0; // Czas bieżący
       var spaceShipGunUpgradeLevel = 0; // poziom ulepszenia broni
+      var enginesUpgradeLevel = 0;
+      var bulletsUpgradeLevel = 0;
 
       const upgradesData = {
         spaceShipGunUpgrade: { name: "Space Ship Gun Upgrade", cost: 5 },
-        enginesUpgrade: { name: "Engines Upgrade", cost: 15 },
-        ShieldUpgrade: { name: "Shield Upgrade", cost: 10 },
+        enginesUpgrade: { name: "Engines Upgrade", cost: 3 },
+        bulletsUpgrade: { name: "Bullets upgrade", cost: 4 },
         // Dodaj więcej opcji ulepszeń według potrzeb
       };
 
@@ -90,9 +112,10 @@ window.onload = function () {
 
       var player_width = 16;
       var player_height = 16;
+      var player_speed = 0.02;
       var playerImg = new Image();
       var score = 0;
-      var gears = 0;
+      var gears = 100;
       var difficultyLevel = 1;
       var health = 100;
       playerImg.src = "SpaceShip.png";
@@ -126,23 +149,31 @@ window.onload = function () {
       var gear_height = 28;
       // var gear_speed;
 
-      function Player(x, y, width, height) {
+      function Player(x, y, width, height, speed) {
         this.x = x;
         this.y = y;
         this.width = width;
         this.height = height;
+        this.speed = speed;
 
         this.draw = function () {
           c.beginPath();
-          c.drawImage(
-            playerImg,
-            mouse.x - player_width,
-            mouse.y - player_height
-          );
+          c.drawImage(playerImg, this.x, this.y);
         };
 
         this.update = function () {
-          this.x = mouse.x - player_width;
+          // Oblicz różnicę między pozycją docelową a aktualną pozycją gracza
+          const deltaX = mouse.x - this.width / 2 - this.x;
+          const deltaY = mouse.y - this.height / 2 - this.y;
+
+          //zmienna dla prędkości
+          let correctedSpeed = Math.min(
+            player_speed * 100,
+            Math.abs(this.speed * deltaX)
+          );
+          // Interpolacja liniowa dla płynnego poruszania się gracza
+          this.x += Math.sign(deltaX) * correctedSpeed;
+          //console.log(deltaX * player_speed);
           this.y = mouse.y - player_height;
           this.draw();
         };
@@ -241,7 +272,13 @@ window.onload = function () {
         };
       }
 
-      var __player = new Player(mouse.x, mouse.y, player_width, player_height);
+      var __player = new Player(
+        mouse.x,
+        mouse.y,
+        player_width,
+        player_height,
+        player_speed
+      );
 
       //funkcja spawnująca gwiazdy
       function drawStars(starting) {
@@ -283,13 +320,13 @@ window.onload = function () {
             var y = -enemy_height;
             var width = enemy_width;
             var height = enemy_height;
-            var speed = Math.random() * 1.6 + 0.4;
+            var speed = Math.random() * 1.1 + 0.4;
             var __enemy = new Enemy(x, y, width, height, speed);
             _enemies.push(__enemy);
           }
         }
       }
-      setInterval(drawEnemies, 1400);
+      setInterval(drawEnemies, 2800);
 
       function drawHealthkits() {
         if (!gamePaused) {
@@ -311,13 +348,13 @@ window.onload = function () {
           currentTime = Date.now();
           if (currentTime - lastShotTime > bulletCooldown) {
             for (var _ = 0; _ < 1; _++) {
-              var x = mouse.x + player_width / 2 - bullet_width / 2;
-              var y = mouse.y - player_height;
+              var x = __player.x + player_width / 2 + bullet_width + 7;
+              var y = __player.y + player_height;
               var __bullet = new Bullet(
                 x,
                 y,
-                bullet_width,
-                bullet_height,
+                bullet_width + bulletsUpgradeLevel * 2,
+                bullet_height + bulletsUpgradeLevel * 2,
                 bullet_speed
               );
               _bullets.push(__bullet);
@@ -506,6 +543,23 @@ window.onload = function () {
               console.log(
                 "Not enough gears to purchase Space Ship Gun Upgrade!"
               );
+            }
+          case "enginesUpgrade":
+            if (gears >= upgradesData.enginesUpgrade.cost) {
+              gears -= upgradesData.enginesUpgrade.cost;
+              enginesUpgradeLevel++;
+              player_speed = 0.02 + enginesUpgradeLevel * 0.1;
+              console.log("Engines upgrade purchased! Speed increased.");
+            } else {
+              console.log("Not enough gears to purchase engines upgrade!");
+            }
+          case "bulletsUpgrade":
+            if (gears >= upgradesData.bulletsUpgrade.cost) {
+              gears -= upgradesData.bulletsUpgrade.cost;
+              bulletsUpgradeLevel++;
+              console.log("Engines upgrade purchased! Speed increased.");
+            } else {
+              console.log("Not enough gears to purchase engines upgrade!");
             }
             break;
           // Dodaj obsługę innych ulepszeń według potrzeb
