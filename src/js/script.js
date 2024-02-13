@@ -4,7 +4,7 @@ window.onload = function () {
   var audio;
   let play = document.getElementById("start-button");
   function playMusic() {
-    audio = new Audio("Brave-pilots.ogg");
+    audio = new Audio("../audio/Brave-pilots.ogg");
     audio.loop = true;
     audio.volume = 0.1;
     audio.play();
@@ -60,8 +60,13 @@ window.onload = function () {
     var shootButton = document.createElement("button");
     shootButton.id = "shoot-button";
     shootButton.classList.add("shoot-button");
+
+    var upgradesButton = document.createAttribute("button");
+    upgradesButton.id = "upgrade-button";
+
     if (isTouchDevice) {
       startScreen.appendChild(shootButton);
+      // startScreen.appendChild(upgradesButton);
     }
 
     // if (isTouchDevice) {
@@ -130,7 +135,7 @@ window.onload = function () {
       var gears = 0;
       var difficultyLevel = 1;
       var health = 100;
-      playerImg.src = "SpaceShip.png";
+      playerImg.src = "../img/SpaceShip.png";
 
       var _stars = [];
       var star_radius = 1;
@@ -144,19 +149,19 @@ window.onload = function () {
 
       var _enemies = [];
       var enemyImg = new Image();
-      enemyImg.src = "Alien_ship.png";
+      enemyImg.src = "../img/Alien_ship.png";
       var enemy_width = 38; //w rzeczywistości sprite wynosi 38 pixeli
       var enemy_height = 38;
 
       var _healthkits = [];
       var healthkitImg = new Image();
-      healthkitImg.src = "HealthStar.png";
+      healthkitImg.src = "../img/HealthStar.png";
       var healthkit_width = 28;
       var healthkit_height = 28;
 
       var _gears = [];
       var gearImg = new Image();
-      gearImg.src = "Gear.png";
+      gearImg.src = "../img/Gear.png";
       var gear_width = 28;
       var gear_height = 28;
       // var gear_speed;
