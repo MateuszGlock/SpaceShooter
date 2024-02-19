@@ -35,13 +35,43 @@ window.onload = function () {
 
   function toggleTutorialModal() {
     var tutorialModal = document.getElementById("tutorial-modal");
-    tutorialModal.style.display = "flex";
+
+    if (
+      tutorialModal.style.display === "none" ||
+      tutorialModal.style.display === ""
+    ) {
+      tutorialModal.style.display = "flex";
+      tutorialModal.classList.remove("hide-modal");
+      tutorialModal.classList.add("show-modal", "modal-animation");
+    } else {
+      tutorialModal.classList.add("hide-modal", "modal-animation");
+
+      // Dodaj nasłuchiwanie zakończenia animacji i ukryj modal po zakończeniu
+      tutorialModal.addEventListener(
+        "transitionend",
+        function () {
+          tutorialModal.style.display = "none";
+          tutorialModal.classList.remove("hide-modal", "modal-animation");
+        },
+        { once: true }
+      );
+    }
   }
 
   function closeTutorialModal() {
     var tutorialModal = document.getElementById("tutorial-modal");
 
-    tutorialModal.style.display = "none";
+    tutorialModal.classList.add("hide-modal");
+
+    // Dodaj nasłuchiwanie zakończenia animacji i ukryj modal po zakończeniu
+    tutorialModal.addEventListener(
+      "transitionend",
+      function () {
+        tutorialModal.style.display = "none";
+        tutorialModal.classList.remove("hide-modal");
+      },
+      { once: true }
+    );
   }
 
   function begin() {
