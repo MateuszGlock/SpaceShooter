@@ -2,6 +2,7 @@ window.onload = function () {
   var startButton = document.getElementById("start-button");
   startButton.addEventListener("click", begin);
   var audio;
+  let shooting_sound = new Audio("src/audio/mixkit-game-whip-shot-1512.wav");
   let play = document.getElementById("start-button");
   function playMusic() {
     audio = new Audio("src/audio/Brave-pilots.ogg");
@@ -405,6 +406,7 @@ window.onload = function () {
                 bullet_speed
               );
               _bullets.push(__bullet);
+              shooting_sound.play();
               lastShotTime = currentTime; // Zaktualizuj czas ostatniego strzału
               updateShootButtonState();
             }
