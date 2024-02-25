@@ -1,137 +1,121 @@
+//function for all code
 window.onload = function () {
-  var startButton = document.getElementById("start-button");
+  //buttons and slider and what they do
+
+  const startButton = document.getElementById("start-button");
   startButton.addEventListener("click", begin);
-  var audio;
-  let shooting_sound = new Audio("src/audio/mixkit-game-whip-shot-1512.wav");
-  let play = document.getElementById("start-button");
-  function playMusic() {
-    audio = new Audio("src/audio/Brave-pilots.ogg");
-    audio.loop = true;
-    audio.volume = 0.1;
-    audio.play();
-  }
-  var tutorialButton = document.getElementById("tutorial-button");
-  tutorialButton.addEventListener("click", toggleTutorialModal);
+  startButton.addEventListener("click", playMusic);
 
-  var closeButton = document.getElementById("close-button");
-  closeButton.addEventListener("click", closeTutorialModal);
-
-  play.addEventListener("click", playMusic);
-
-  var volumeSlider = document.getElementById("volume-slider");
+  let volumeSlider = document.getElementById("volume-slider");
+  volumeSlider.value = 10; //beginning volume
   volumeSlider.addEventListener("input", function () {
-    // Aktualizuj głośność na podstawie wartości suwaka
     updateVolume(volumeSlider.value);
   });
 
-  function updateVolume(volume) {
-    if (audio) {
-      // Gwarantuj, że wartość głośności jest w odpowiednim zakresie (0-1)
-      volume = Math.max(0, Math.min(100, volume)) / 100;
-      audio.volume = volume;
-    }
-  }
-  var tutorialButton = document.getElementById("tutorial-button");
+  let tutorialButton = document.getElementById("tutorial-button");
   tutorialButton.addEventListener("click", toggleTutorialModal);
 
-  function toggleTutorialModal() {
-    var tutorialModal = document.getElementById("tutorial-modal");
+  let closeButton = document.getElementById("close-button");
+  closeButton.addEventListener("click", toggleTutorialModal);
 
-    if (
-      tutorialModal.style.display === "none" ||
-      tutorialModal.style.display === ""
-    ) {
+  //variables and function for music and sounds
+
+  let backgroundMusic = new Audio("src/audio/Brave-pilots.ogg");
+  let shooting_sound = new Audio("src/audio/mixkit-game-whip-shot-1512.wav");
+  let enemy_explosion_sound = new Audio(
+    "src/audio/mixkit-short-explosion-1694.wav"
+  );
+  let gear_sound = new Audio(
+    "src/audio/mixkit-dropping-keys-in-the-floor-2839.wav"
+  );
+  let star_sound = new Audio(
+    "src/audio/mixkit-extra-bonus-in-a-video-game-2045.wav"
+  );
+
+  function playMusic() {
+    backgroundMusic.loop = true;
+    backgroundMusic.volume = 0.1; //beggining background volume
+    backgroundMusic.play();
+  }
+
+  function updateVolume(volume) {
+    if (backgroundMusic) {
+      volume = Math.max(0, Math.min(100, volume)) / 100; //converting volume slider value to 0-1
+      backgroundMusic.volume = volume;
+    }
+  }
+
+  //modal craziness
+
+  function toggleTutorialModal() {
+    const tutorialModal = document.getElementById("tutorial-modal");
+
+    if (tutorialModal.style.display === "") {
       tutorialModal.style.display = "flex";
       tutorialModal.classList.remove("hide-modal");
-      tutorialModal.classList.add("show-modal", "modal-animation");
     } else {
-      tutorialModal.classList.add("hide-modal", "modal-animation");
+      //starting animation for closing modal
+      tutorialModal.classList.add("hide-modal");
 
-      // Dodaj nasłuchiwanie zakończenia animacji i ukryj modal po zakończeniu
+      //after animation close modal
       tutorialModal.addEventListener(
         "transitionend",
         function () {
-          tutorialModal.style.display = "none";
-          tutorialModal.classList.remove("hide-modal", "modal-animation");
+          tutorialModal.style.display = "";
         },
-        { once: true }
+        { once: true } //deleting Event Listener after using it
       );
     }
   }
 
-  function closeTutorialModal() {
-    var tutorialModal = document.getElementById("tutorial-modal");
-
-    tutorialModal.classList.add("hide-modal");
-
-    // Dodaj nasłuchiwanie zakończenia animacji i ukryj modal po zakończeniu
-    tutorialModal.addEventListener(
-      "transitionend",
-      function () {
-        tutorialModal.style.display = "none";
-        tutorialModal.classList.remove("hide-modal");
-      },
-      { once: true }
-    );
-  }
-
   function begin() {
-    var startScreen = document.getElementById("start-screen");
-    startScreen.innerHTML = ""; // Usunięcie zawartości diva startowego
-
-    var canvas = document.createElement("canvas");
+    //setup for gameplay
+    const startScreen = document.getElementById("start-screen");
+    startScreen.innerHTML = "";
+    let canvas = document.createElement("canvas");
     canvas.id = "game-canvas";
-    canvas.width = 100;
-    canvas.height = 100;
-
     startScreen.appendChild(canvas);
 
-    var isTouchDevice = "ontouchstart" in document.documentElement;
+    let drawingCanvas = document.querySelector("canvas");
+    drawingCanvas.width = innerWidth;
+    drawingCanvas.height = innerHeight;
+    drawingCanvas = drawingCanvas.getContext("2d");
 
-    var shootButton = document.createElement("button");
+    //setup for mobile devices - TO DO
+    let isTouchDevice = "ontouchstart" in document.documentElement;
+    const shootButton = document.createElement("button");
     shootButton.id = "shoot-button";
     shootButton.classList.add("shoot-button");
-
-    var upgradesButton = document.createAttribute("button");
+    const upgradesButton = document.createAttribute("button");
     upgradesButton.id = "upgrade-button";
 
     if (isTouchDevice) {
       startScreen.appendChild(shootButton);
       // startScreen.appendChild(upgradesButton);
+      // shootButton.addEventListener("click", fire);
     }
-
-    // if (isTouchDevice) {
-    //  shootButton.addEventListener("click", fire);
-    // }
-    // Tutaj można umieścić resztę kodu gry, który byłby wywoływany po kliknięciu przycisku
-    // Możesz przenieść kod tworzenia gry tutaj
-    // ...
-
-    // Przykładowy kod rysujący na canvasie po jego utworzeniu
-
-    var c = document.querySelector("canvas");
-    var canvas = document.querySelector("canvas");
-    c.width = innerWidth;
-    c.height = innerHeight;
-    c = c.getContext("2d");
+    //actual game beginning
     function startGame() {
-      var gamePaused = false; // Dodanie zmiennej do śledzenia stanu gry (pauza / niepauza)
-      var upgradesMenuOpen = false; //Czy włączone jest menu ulepszeń?
-      var gameOverlayed = false; // czy gra jest przykryta - do sprawdzenie czy dwie powyższe zmienne są konieczne
-      var bulletCooldown = 1000; // Czas trwania cooldownu w milisekundach
-      var lastShotTime = 0; // Czas ostatniego strzału
-      var currentTime = 0; // Czas bieżący
-      var spaceShipGunUpgradeLevel = 0; // poziom ulepszenia broni
-      var enginesUpgradeLevel = 0;
-      var bulletsUpgradeLevel = 0;
+      //variables for game and player abilities
+      let gamePaused = false;
+      let upgradesMenuOpen = false;
+      let gameOverlayed = false; // czy gra jest przykryta - do sprawdzenie czy dwie powyższe zmienne są konieczne
+      let bulletCooldown = 1000; // cooldown in ms
+      let lastShotTime = 0;
+      let currentTime = 0;
+      let spaceShipGunUpgradeLevel = 0;
+      let enginesUpgradeLevel = 0;
+      let bulletsUpgradeLevel = 0;
+      let increasedDifficulty = false;
 
+      //object for upgrades list
       const upgradesData = {
         spaceShipGunUpgrade: { name: "Space Ship Gun Upgrade", cost: 5 },
         enginesUpgrade: { name: "Engines Upgrade", cost: 3 },
         bulletsUpgrade: { name: "Bullets upgrade", cost: 4 },
-        // Dodaj więcej opcji ulepszeń według potrzeb
       };
 
+      //starting position for player ship
       mouse = {
         x: innerWidth / 2,
         y: innerHeight - 33,
@@ -141,61 +125,59 @@ window.onload = function () {
         x: innerWidth / 2,
         y: innerHeight - 33,
       };
-
+      //updating postion of spaceship
       canvas.addEventListener("mousemove", function (event) {
         mouse.x = event.clientX;
       });
 
       canvas.addEventListener("touchmove", function (event) {
-        var rect = canvas.getBoundingClientRect();
-        var root = document.documentElement;
-        var touch = event.changedTouches[0];
-        var touchX = parseInt(touch.clientX);
-        //var touchY = parseInt(touch.clientY) - rect.top - root.scrollTop;
+        let touch = event.changedTouches[0];
+        let touchX = parseInt(touch.clientX);
         event.preventDefault();
         mouse.x = touchX;
-        //mouse.y = touchY;
+        mouse.y = touchY;
       });
-      var increasedDifficulty = false;
 
-      var player_width = 16;
-      var player_height = 16;
-      var player_speed = 0.02;
-      var playerImg = new Image();
-      var score = 0;
-      var gears = 0;
-      var difficultyLevel = 1;
-      var health = 100;
+      //object variables
+      let player_width = 16;
+      let player_height = 16;
+      let player_speed = 0.03;
+      let playerImg = new Image();
+      let score = 0;
+      let gears = 0;
+      let difficultyLevel = 1;
+      let health = 100;
       playerImg.src = "src/img/SpaceShip.png";
 
-      var _stars = [];
-      var star_radius = 1;
+      const _stars = [];
+      let star_radius = 1;
       var star_height = 0;
-      var star_speed = 0.5;
+      let star_speed = 0.5;
 
-      var _bullets = [];
-      var bullet_width = 6;
-      var bullet_height = 8;
-      var bullet_speed = 10;
+      let _bullets = [];
+      let bullet_width = 6;
+      let bullet_height = 8;
+      let bullet_speed = 10;
 
-      var _enemies = [];
-      var enemyImg = new Image();
+      let _enemies = [];
+      let enemyImg = new Image();
       enemyImg.src = "src/img/Alien_ship.png";
-      var enemy_width = 38; //w rzeczywistości sprite wynosi 38 pixeli
-      var enemy_height = 38;
+      let enemy_width = 38;
+      let enemy_height = 38;
 
-      var _healthkits = [];
-      var healthkitImg = new Image();
-      healthkitImg.src = "src/img/HealthStar.png";
-      var healthkit_width = 28;
-      var healthkit_height = 28;
+      let _healthStars = [];
+      let healthStarImg = new Image();
+      healthStarImg.src = "src/img/HealthStar.png";
+      let healthStar_width = 36;
+      let healthStar_height = 36;
 
-      var _gears = [];
-      var gearImg = new Image();
+      let _gears = [];
+      let gearImg = new Image();
       gearImg.src = "src/img/Gear.png";
-      var gear_width = 28;
-      var gear_height = 28;
-      // var gear_speed;
+      let gear_width = 28;
+      let gear_height = 28;
+
+      //all game object classes and function
 
       function Player(x, y, width, height, speed) {
         this.x = x;
@@ -203,17 +185,16 @@ window.onload = function () {
         this.width = width;
         this.height = height;
         this.speed = speed;
-
+        //drawing player spirte
         this.draw = function () {
-          c.beginPath();
-          c.drawImage(playerImg, this.x, this.y);
+          drawingCanvas.beginPath();
+          drawingCanvas.drawImage(playerImg, this.x - player_width, this.y);
         };
-
+        //animating a player movement - a nie mam siły już tego poprawiać, może kiedyś wrócę do upraszaczania tej funkcji
         this.update = function () {
           // Oblicz różnicę między pozycją docelową a aktualną pozycją gracza
           const deltaX = mouse.x - this.width / 2 - this.x;
           const deltaY = mouse.y - this.height / 2 - this.y;
-
           //zmienna dla prędkości
           let correctedSpeed = Math.min(
             player_speed * 100,
@@ -221,8 +202,8 @@ window.onload = function () {
           );
           // Interpolacja liniowa dla płynnego poruszania się gracza
           this.x += Math.sign(deltaX) * correctedSpeed;
-          //console.log(deltaX * player_speed);
           this.y = mouse.y - player_height;
+
           this.draw();
         };
       }
@@ -234,10 +215,9 @@ window.onload = function () {
         this.speed = speed;
 
         this.draw = function () {
-          c.beginPath();
-          c.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false);
-          c.fillStyle = "white";
-          c.fill();
+          drawingCanvas.beginPath();
+          drawingCanvas.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false);
+          drawingCanvas.fill();
         };
 
         this.update = function () {
@@ -254,10 +234,9 @@ window.onload = function () {
         this.speed = speed;
 
         this.draw = function () {
-          c.beginPath();
-          c.rect(this.x, this.y, this.width, this.height);
-          c.fillStyle = "white";
-          c.fill();
+          drawingCanvas.beginPath();
+          drawingCanvas.rect(this.x, this.y, this.width, this.height);
+          drawingCanvas.fill();
         };
 
         this.update = function () {
@@ -274,8 +253,8 @@ window.onload = function () {
         this.speed = speed;
 
         this.draw = function () {
-          c.beginPath();
-          c.drawImage(enemyImg, this.x - enemy_width / 10, this.y); //wyrównanie x przez width, bo jest trochę enemy sprite jest trochę krzywo nakładany
+          drawingCanvas.beginPath();
+          drawingCanvas.drawImage(enemyImg, this.x - enemy_width / 10, this.y); //wyrównanie x przez width, bo jest trochę enemy sprite jest trochę krzywo nakładany
         };
 
         this.update = function () {
@@ -284,7 +263,7 @@ window.onload = function () {
         };
       }
 
-      function Healthkit(x, y, width, height, speed) {
+      function HealthStar(x, y, width, height, speed) {
         this.x = x;
         this.y = y;
         this.width = width;
@@ -292,8 +271,13 @@ window.onload = function () {
         this.speed = speed;
 
         this.draw = function () {
-          c.beginPath();
-          c.drawImage(healthkitImg, this.x - healthkit_width / 10, this.y);
+          drawingCanvas.beginPath();
+          //hitbox
+          drawingCanvas.drawImage(
+            healthStarImg,
+            this.x - healthStar_width / 4,
+            this.y
+          );
         };
 
         this.update = function () {
@@ -310,8 +294,8 @@ window.onload = function () {
         this.speed = speed;
 
         this.draw = function () {
-          c.beginPath();
-          c.drawImage(gearImg, this.x - gear_width / 10, this.y); //wyrównanie x przez width, bo jest trochę enemy sprite jest trochę krzywo nakładany
+          drawingCanvas.beginPath();
+          drawingCanvas.drawImage(gearImg, this.x - gear_width / 10, this.y);
         };
 
         this.update = function () {
@@ -320,7 +304,7 @@ window.onload = function () {
         };
       }
 
-      var __player = new Player(
+      const __player = new Player(
         mouse.x,
         mouse.y,
         player_width,
@@ -328,12 +312,12 @@ window.onload = function () {
         player_speed
       );
 
-      //funkcja spawnująca gwiazdy
+      //drawing functions
       function drawStars(starting) {
         if (!gamePaused) {
-          for (var _ = 0; _ < 400; _++) {
-            var x = Math.random() * (innerWidth - star_radius);
-            var y;
+          for (let _ = 0; _ < 400; _++) {
+            let x = Math.random() * (innerWidth - star_radius);
+            let y;
             if (starting) {
               y = Math.random() * innerHeight;
               // console.log("starting stars");
@@ -341,9 +325,9 @@ window.onload = function () {
               y = star_height;
               _ = _ + 10;
             }
-            var width = star_radius;
-            var speed = Math.random() * star_speed;
-            var __star = new Star(x, y, width, speed);
+            let width = star_radius;
+            let speed = Math.random() * star_speed;
+            let __star = new Star(x, y, width, speed);
             _stars.push(__star);
           }
         }
@@ -363,42 +347,42 @@ window.onload = function () {
       }
       function drawEnemies() {
         if (!gamePaused && !increasedDifficulty) {
-          for (var _ = 0; _ < difficultyLevel; _++) {
-            var x = Math.random() * (innerWidth - enemy_width);
-            var y = -enemy_height;
-            var width = enemy_width;
-            var height = enemy_height;
-            var speed = Math.random() * 1.1 + 0.4;
-            var __enemy = new Enemy(x, y, width, height, speed);
+          for (let _ = 0; _ < difficultyLevel; _++) {
+            let x = Math.random() * (innerWidth - enemy_width);
+            let y = -enemy_height;
+            let width = enemy_width;
+            let height = enemy_height;
+            let speed = Math.random() * 1.1 + 0.4;
+            let __enemy = new Enemy(x, y, width, height, speed);
             _enemies.push(__enemy);
           }
         }
       }
       setInterval(drawEnemies, 2800);
 
-      function drawHealthkits() {
+      function drawHealthStar() {
         if (!gamePaused) {
-          for (var _ = 0; _ < 1; _++) {
-            var x = Math.random() * (innerWidth - enemy_width);
-            var y = -enemy_height;
-            var width = healthkit_width;
-            var height = healthkit_height;
-            var speed = Math.random() * 2.6;
-            var __healthkit = new Healthkit(x, y, width, height, speed);
-            _healthkits.push(__healthkit);
+          for (let _ = 0; _ < 1; _++) {
+            let x = Math.random() * (innerWidth - enemy_width);
+            let y = -enemy_height;
+            let width = healthStar_width;
+            let height = healthStar_height;
+            let speed = Math.random() * 2.6;
+            let __healthStar = new HealthStar(x, y, width, height, speed);
+            _healthStars.push(__healthStar);
           }
         }
       }
-      setInterval(drawHealthkits, 15000);
+      setInterval(drawHealthStar, 15000);
 
       function fire() {
         if (!gamePaused) {
           currentTime = Date.now();
           if (currentTime - lastShotTime > bulletCooldown) {
-            for (var _ = 0; _ < 1; _++) {
-              var x = __player.x + player_width / 2 + bullet_width + 7;
-              var y = __player.y + player_height;
-              var __bullet = new Bullet(
+            for (let _ = 0; _ < 1; _++) {
+              let x = __player.x + bullet_width;
+              let y = __player.y + player_height;
+              let __bullet = new Bullet(
                 x,
                 y,
                 bullet_width + bulletsUpgradeLevel * 2,
@@ -434,10 +418,9 @@ window.onload = function () {
       // canvas.addEventListener("click", function () {}); - nie wiem czy to po coś tu było, ale zostawiam w kom żeby nie zepsuć xD
 
       function drawGears(x, y, speed) {
-        var width = gear_width;
-        var height = gear_height;
-        var speed = speed;
-        var __gear = new Gear(x, y, width, height, speed);
+        let width = gear_width;
+        let height = gear_height;
+        let __gear = new Gear(x, y, width, height, speed);
         _gears.push(__gear);
       }
 
@@ -449,9 +432,9 @@ window.onload = function () {
             _enemies[enemyNumber].y,
             _enemies[enemyNumber].speed
           );
-          // console.log("Gear");
         }
         _enemies.splice(enemyNumber, 1);
+        enemy_explosion_sound.play();
       }
 
       function collision(a, b) {
@@ -462,7 +445,6 @@ window.onload = function () {
           a.y + a.height > b.y
         );
       }
-      //  c.font = "1em Arial"; // po cholerę ta linijka?
 
       function stoperror() {
         return true;
@@ -479,12 +461,12 @@ window.onload = function () {
         }
       });
       function toggleOverlay(overlayType) {
-        var gameOverlay = document.getElementById("game-overlay");
-        var pauseMenu = document.getElementById("pause-menu");
-        var upgradeMenu = document.getElementById("upgrades-menu");
+        let gameOverlay = document.getElementById("game-overlay");
+        let pauseMenu = document.getElementById("pause-menu");
+        let upgradeMenu = document.getElementById("upgrades-menu");
 
         // Wyłącz wszystkie dzieci gameOverlay
-        for (var i = 0; i < gameOverlay.children.length; i++) {
+        for (let i = 0; i < gameOverlay.children.length; i++) {
           gameOverlay.children[i].style.display = "none";
         }
 
@@ -613,7 +595,7 @@ window.onload = function () {
             if (gears >= upgradesData.enginesUpgrade.cost) {
               gears -= upgradesData.enginesUpgrade.cost;
               enginesUpgradeLevel++;
-              player_speed = 0.02 + enginesUpgradeLevel * 0.1;
+              player_speed = player_speed + enginesUpgradeLevel * 0.01;
               console.log("Engines upgrade purchased! Speed increased.");
             } else {
               console.log("Not enough gears to purchase engines upgrade!");
@@ -669,31 +651,31 @@ window.onload = function () {
         if (!gamePaused) {
           requestAnimationFrame(animate); // alternatywa dla SetInterval, wywołuję funkcję animate przy każdym odświeżeniu ekranu
         }
-        c.beginPath();
-        c.clearRect(0, 0, innerWidth, innerHeight);
-        c.fillStyle = "white";
-        c.font = "1em 'Press Start 2P'";
-        c.fillText("Health: " + health, 15, 25);
-        c.fillText("Score: " + score, 15, 45);
-        c.fillText("Gears: " + gears, 15, 65);
+        drawingCanvas.beginPath();
+        drawingCanvas.clearRect(0, 0, innerWidth, innerHeight);
+        drawingCanvas.fillStyle = "white";
+        drawingCanvas.font = "1em 'Press Start 2P'";
+        drawingCanvas.fillText("Health: " + health, 15, 25);
+        drawingCanvas.fillText("Score: " + score, 15, 45);
+        drawingCanvas.fillText("Gears: " + gears, 15, 65);
 
         __player.update();
 
-        for (var i = 0; i < _stars.length; i++) {
+        for (let i = 0; i < _stars.length; i++) {
           _stars[i].update();
           if (_stars[i].y > innerHeight) {
             _stars.splice(i, 1);
           }
         }
 
-        for (var i = 0; i < _bullets.length; i++) {
+        for (let i = 0; i < _bullets.length; i++) {
           _bullets[i].update();
           if (_bullets[i].y < 0) {
             _bullets.splice(i, 1);
           }
         }
 
-        for (var k = 0; k < _enemies.length; k++) {
+        for (let k = 0; k < _enemies.length; k++) {
           _enemies[k].update();
           if (_enemies[k].y > innerHeight) {
             _enemies.splice(k, 1);
@@ -704,15 +686,15 @@ window.onload = function () {
             }
           }
         }
-        for (var g = 0; g < _gears.length; g++) {
+        for (let g = 0; g < _gears.length; g++) {
           _gears[g].update();
           if (_gears[g].y > innerHeight) {
             _gears.splice(g, 1);
           }
         }
 
-        for (var j = _enemies.length - 1; j >= 0; j--) {
-          for (var l = _bullets.length - 1; l >= 0; l--) {
+        for (let j = _enemies.length - 1; j >= 0; j--) {
+          for (let l = _bullets.length - 1; l >= 0; l--) {
             if (collision(_enemies[j], _bullets[l])) {
               killEnemy(j);
               _bullets.splice(l, 1);
@@ -721,25 +703,26 @@ window.onload = function () {
             }
           }
         }
-        for (var h = 0; h < _healthkits.length; h++) {
-          _healthkits[h].update();
+        for (let h = 0; h < _healthStars.length; h++) {
+          _healthStars[h].update();
         }
-        for (var hh = _healthkits.length - 1; hh >= 0; hh--) {
-          for (var hhh = _bullets.length - 1; hhh >= 0; hhh--) {
-            if (collision(_healthkits[hh], _bullets[hhh])) {
-              _healthkits.splice(hh, 1);
+        for (let hh = _healthStars.length - 1; hh >= 0; hh--) {
+          for (let hhh = _bullets.length - 1; hhh >= 0; hhh--) {
+            if (collision(_healthStars[hh], _bullets[hhh])) {
+              _healthStars.splice(hh, 1);
               _bullets.splice(hhh, 1);
               health += 10;
+              star_sound.play();
             }
           }
         }
-        for (var gg = _gears.length - 1; gg >= 0; gg--) {
+        for (let gg = _gears.length - 1; gg >= 0; gg--) {
           if (collision(__player, _gears[gg])) {
             _gears.splice(gg, 1);
             gears += 1;
-            //console.log("gear collected");
+            gear_sound.play();
           }
-          for (var ggg = _bullets.length - 1; ggg >= 0; ggg--) {
+          for (let ggg = _bullets.length - 1; ggg >= 0; ggg--) {
             if (collision(_gears[gg], _bullets[ggg])) {
               _gears.splice(gg, 1);
               _bullets.splice(ggg, 1); //dodać animację niszczenia zębatek
