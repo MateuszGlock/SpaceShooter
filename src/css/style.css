@@ -18,7 +18,7 @@ body {
   text-align: center;
   font-size: 40px;
   color: #977da1; /* Kolor tytułu */
-  margin-bottom: 10px; /* Dodatkowy odstęp między tytułem a przyciskiem */
+  margin-bottom: 100px; /* Dodatkowy odstęp między tytułem a przyciskiem */
   font-family: "Press Start 2P", cursive;
   margin-bottom: 200px;
   animation: changeColor 4s infinite;
@@ -300,4 +300,9 @@ body {
 .hide-modal {
   opacity: 0;
   transition: opacity 0.5s ease-in-out;
+}
+.signature {
+  position: flex;
+  color: rgb(72, 72, 72);
+  margin-top: 10%;
 }
