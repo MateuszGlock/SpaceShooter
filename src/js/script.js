@@ -99,20 +99,39 @@ window.onload = function () {
       //variables for game and player abilities
       let gamePaused = false;
       let upgradesMenuOpen = false;
-      let gameOverlayed = false; // czy gra jest przykryta - do sprawdzenie czy dwie powyższe zmienne są konieczne
       let bulletCooldown = 1000; // cooldown in ms
       let lastShotTime = 0;
       let currentTime = 0;
       let spaceShipGunUpgradeLevel = 0;
       let enginesUpgradeLevel = 0;
       let bulletsUpgradeLevel = 0;
-      let increasedDifficulty = false;
+      let waveBreak = false;
 
       //object for upgrades list
       const upgradesData = {
-        spaceShipGunUpgrade: { name: "Space Ship Gun Upgrade", cost: 5 },
-        enginesUpgrade: { name: "Engines Upgrade", cost: 3 },
-        bulletsUpgrade: { name: "Bullets upgrade", cost: 4 },
+        spaceShipGunUpgrade: {
+          name: "Space Ship Gun Upgrade",
+          cost: 5,
+          purchase: function () {
+            spaceShipGunUpgradeLevel++;
+            bulletCooldown = 1000 / (spaceShipGunUpgradeLevel + 1);
+          },
+        },
+        enginesUpgrade: {
+          name: "Engines Upgrade",
+          cost: 3,
+          purchase: function () {
+            enginesUpgradeLevel++;
+            player_speed += enginesUpgradeLevel * 0.01;
+          },
+        },
+        bulletsUpgrade: {
+          name: "Bullets upgrade",
+          cost: 4,
+          purchase: function () {
+            bulletsUpgradeLevel++;
+          },
+        },
       };
 
       //starting position for player ship
@@ -144,8 +163,22 @@ window.onload = function () {
       let player_speed = 0.03;
       let playerImg = new Image();
       let score = 0;
+
       let gears = 0;
-      let difficultyLevel = 1;
+      let waveNumber = 1;
+      let requiredScore = 15 + (waveNumber - 1) * 10;
+
+      /**
+       * 1. zespawnownanie przeciwnika 25 razy - 325
+       * 2. sprawdzenie czy pozostał żywy przeciwnik
+       * 3.
+       *
+       *
+       *
+       *
+       *
+       */
+      let enemiesSpawned = 0;
       let health = 100;
       playerImg.src = "src/img/SpaceShip.png";
 
@@ -320,7 +353,6 @@ window.onload = function () {
             let y;
             if (starting) {
               y = Math.random() * innerHeight;
-              // console.log("starting stars");
             } else {
               y = star_height;
               _ = _ + 10;
@@ -335,19 +367,17 @@ window.onload = function () {
       drawStars(true);
       setInterval(drawStars, 2000);
 
-      function updateDifficultyLevel(score) {
-        if (score % (25 * Math.pow(difficultyLevel, 2)) === 0) {
-          increasedDifficulty = true;
-          difficultyLevel++;
-
-          setTimeout(function () {
-            increasedDifficulty = false;
-          }, 10000);
-        }
+      function openWorkshop() {
+        toggleOverlay("upgradeMenu");
+        setTimeout(function () {
+          toggleOverlay("upgradeMenu");
+          waveBreak = false;
+          scheduleDrawEnemies(requiredScore);
+        }, 15000);
       }
       function drawEnemies() {
-        if (!gamePaused && !increasedDifficulty) {
-          for (let _ = 0; _ < difficultyLevel; _++) {
+        if (!gamePaused) {
+          for (let _ = 0; _ < waveNumber; _++) {
             let x = Math.random() * (innerWidth - enemy_width);
             let y = -enemy_height;
             let width = enemy_width;
@@ -358,7 +388,20 @@ window.onload = function () {
           }
         }
       }
-      setInterval(drawEnemies, 2800);
+      function scheduleDrawEnemies(requestedAmount) {
+        const intervalId = setInterval(() => {
+          drawEnemies();
+          enemiesSpawned++;
+          if (enemiesSpawned == requestedAmount) {
+            waveBreak = true;
+            waveNumber++;
+            enemiesSpawned = 0;
+            clearInterval(intervalId);
+          }
+        }, 3000);
+      }
+
+      scheduleDrawEnemies(requiredScore);
 
       function drawHealthStar() {
         if (!gamePaused) {
@@ -374,6 +417,13 @@ window.onload = function () {
         }
       }
       setInterval(drawHealthStar, 15000);
+
+      function drawGears(x, y, speed) {
+        let width = gear_width;
+        let height = gear_height;
+        let __gear = new Gear(x, y, width, height, speed);
+        _gears.push(__gear);
+      }
 
       function fire() {
         if (!gamePaused) {
@@ -392,13 +442,16 @@ window.onload = function () {
               _bullets.push(__bullet);
               shooting_sound.play();
               lastShotTime = currentTime; // Zaktualizuj czas ostatniego strzału
-              updateShootButtonState();
+              //updateShootButtonState();
             }
           }
         }
       }
-
-      function updateShootButtonState() {
+      canvas.addEventListener("click", function () {
+        fire();
+      });
+      //function for fire button for mobile devices - TO DO
+      /*  function updateShootButtonState() {
         // Jeśli cooldown jest aktywny, dodaj klasę "cooldown" do przycisku
         if (currentTime - lastShotTime < bulletCooldown) {
           shootButton.classList.add("cooldown");
@@ -411,27 +464,13 @@ window.onload = function () {
       shootButton.addEventListener("animationend", function () {
         // Usunięcie klasy cooldown po zakończeniu animacji
         shootButton.classList.remove("cooldown");
-      });
-      canvas.addEventListener("click", function () {
-        fire();
-      });
-      // canvas.addEventListener("click", function () {}); - nie wiem czy to po coś tu było, ale zostawiam w kom żeby nie zepsuć xD
-
-      function drawGears(x, y, speed) {
-        let width = gear_width;
-        let height = gear_height;
-        let __gear = new Gear(x, y, width, height, speed);
-        _gears.push(__gear);
-      }
+      });*/
 
       function killEnemy(enemyNumber) {
-        // console.log(enemyNumber);
-        if (Math.random() < 0.2) {
-          drawGears(
-            _enemies[enemyNumber].x,
-            _enemies[enemyNumber].y,
-            _enemies[enemyNumber].speed
-          );
+        const { x, y, speed } = _enemies[enemyNumber]; //destructuring
+        if (Math.random() < 0.3) {
+          //chance for gear to spawn
+          drawGears(x, y, speed);
         }
         _enemies.splice(enemyNumber, 1);
         enemy_explosion_sound.play();
@@ -446,17 +485,17 @@ window.onload = function () {
         );
       }
 
-      function stoperror() {
+      /*  function stoperror() {
         return true;
       }
-      window.onerror = stoperror;
+      window.onerror = stoperror;*/
+
+      //overlays craziness
       window.addEventListener("keydown", function (event) {
         if (event.key === "Escape") {
-          // Zmień stan gry (pauza / niepauza)
           toggleOverlay("pauseMenu");
         }
         if (event.key === "e") {
-          // Otwórz lub zamknij menu ulepszeń po naciśnięciu klawisza "e"
           toggleOverlay("upgradeMenu");
         }
       });
@@ -465,12 +504,10 @@ window.onload = function () {
         let pauseMenu = document.getElementById("pause-menu");
         let upgradeMenu = document.getElementById("upgrades-menu");
 
-        // Wyłącz wszystkie dzieci gameOverlay
         for (let i = 0; i < gameOverlay.children.length; i++) {
           gameOverlay.children[i].style.display = "none";
         }
 
-        // Sprawdź typ overlaya
         switch (overlayType) {
           case "pauseMenu":
             if (gamePaused) {
@@ -504,9 +541,9 @@ window.onload = function () {
               animate();
               gameOverlayed = true;
               upgradesMenuOpen = true;
-              console.log("Pauza w upgrady");
               pauseMenu.style.display = "none";
-              upgradeMenu.style.display = "flex";
+              upgradeMenu.style.display = "block";
+              generateUpgradeTiles();
             } else if (upgradesMenuOpen) {
               // Pauza jest wyłączona, ale menu upgradów jest otwarte
 
@@ -521,7 +558,6 @@ window.onload = function () {
               gameOverlayed = true;
               gamePaused = false;
               upgradesMenuOpen = true;
-              console.log("upgrades ON");
               gameOverlay.style.display = "flex";
               upgradeMenu.style.display = "block";
               generateUpgradeTiles();
@@ -531,15 +567,13 @@ window.onload = function () {
             console.error("Nieznany typ overlaya:", overlayType);
         }
       }
-      // Funkcja do generowania kafelków z opcjami ulepszeń
+
       function generateUpgradeTiles() {
-        // Lista ulepszeń
         const upgradesList = document.getElementById("upgrades-list");
 
-        // Usuń istniejące kafelki, jeśli istnieją
         upgradesList.innerHTML = "";
 
-        // Tworzenie kafelków z opcjami ulepszeń
+        // Creating upgrade tiles
         Object.keys(upgradesData).forEach((upgradeKey) => {
           const upgrade = upgradesData[upgradeKey];
           const upgradeTile = document.createElement("li");
@@ -555,6 +589,7 @@ window.onload = function () {
           upgradeButton.classList.add("upgrade-button");
           upgradeButton.addEventListener("click", () => {
             // Tutaj dodaj logikę zakupu ulepszenia
+
             handleUpgradePurchase(upgradeKey);
             // Po zakupie, ponownie generuj kafelki
             generateUpgradeTiles();
@@ -566,87 +601,19 @@ window.onload = function () {
 
           upgradesList.appendChild(upgradeTile);
         });
-
-        /* const upgradeButton = document.createElement("button");
-        upgradeButton.textContent = "Buy";
-        upgradeButton.addEventListener("click", () => {
-          // Tutaj dodaj logikę zakupu ulepszenia
-          handleUpgradePurchase(upgradeKey);
-          // Po zakupie, ponownie generuj kafelki
-          generateUpgradeTiles();
-        });*/
-      }
-      function handleUpgradePurchase(upgrade) {
-        switch (upgrade) {
-          case "spaceShipGunUpgrade":
-            if (gears >= upgradesData.spaceShipGunUpgrade.cost) {
-              gears -= upgradesData.spaceShipGunUpgrade.cost;
-              spaceShipGunUpgradeLevel++;
-              bulletCooldown = 1000 / (spaceShipGunUpgradeLevel + 1);
-              console.log(
-                "Space Ship Gun Upgrade purchased! Cooldown reduced."
-              );
-            } else {
-              console.log(
-                "Not enough gears to purchase Space Ship Gun Upgrade!"
-              );
-            }
-          case "enginesUpgrade":
-            if (gears >= upgradesData.enginesUpgrade.cost) {
-              gears -= upgradesData.enginesUpgrade.cost;
-              enginesUpgradeLevel++;
-              player_speed = player_speed + enginesUpgradeLevel * 0.01;
-              console.log("Engines upgrade purchased! Speed increased.");
-            } else {
-              console.log("Not enough gears to purchase engines upgrade!");
-            }
-          case "bulletsUpgrade":
-            if (gears >= upgradesData.bulletsUpgrade.cost) {
-              gears -= upgradesData.bulletsUpgrade.cost;
-              bulletsUpgradeLevel++;
-              console.log("Engines upgrade purchased! Speed increased.");
-            } else {
-              console.log("Not enough gears to purchase engines upgrade!");
-            }
-            break;
-          // Dodaj obsługę innych ulepszeń według potrzeb
-        }
       }
 
-      /*function ShowOverlay() {
-        var gameOverlay = document.getElementById("game-overlay");
-      }
-      function togglePauseMenu() {
-        var gameOverlay = document.getElementById("game-overlay");
-        //var pauseMenu = document.getElementById("pause-menu"); nieaktualna zmienna
-
-        if (gamePaused) {
-          gameOverlay.style.display = "flex";
-          //pauseMenu.innerHTML = "<p>Pause</p>"; //ustawianie zawartości diva w htmlu - nie działa bo przykrywa suwak głośności
+      function handleUpgradePurchase(upgradeName) {
+        const upgrade = upgradesData[upgradeName]; //computed properties
+        if (gears >= upgrade.cost) {
+          gears -= upgrade.cost;
+          upgrade.purchase();
         } else {
-          gameOverlay.style.display = "none";
-        }
-      }
-      function toggleUpgradesMenu() {
-        var upgradeOverlay = document.getElementById("upgrades-menu");
-        if (upgradesMenuOpen) {
-          upgradeOverlay.style.display = "flex";
-        } else {
-          upgradeOverlay.style.display = "none";
+          console.log(`Not enough gears to purchase ${upgradeName}`);
         }
       }
 
-      /*  function showOverlay() {
-        var overlay = document.getElementById("overlay");
-        overlay.style.display = "flex";
-        overlay.style.background = "rgba(0, 0, 0, 0.5)"; // Zaciemnienie z alpha 0.5
-      }
-
-      function hideOverlay() {
-        var overlay = document.getElementById("overlay");
-        overlay.style.background = "rgba(0, 0, 0, 0)"; // Transparentne tło
-      } To jakieś stare próby, w ogóle do kosza z tym*/
-
+      //animate function for all movement on screen
       function animate() {
         if (!gamePaused) {
           requestAnimationFrame(animate); // alternatywa dla SetInterval, wywołuję funkcję animate przy każdym odświeżeniu ekranu
@@ -699,7 +666,10 @@ window.onload = function () {
               killEnemy(j);
               _bullets.splice(l, 1);
               score++;
-              updateDifficultyLevel(score);
+              if (_enemies.length === 0 && waveBreak) {
+                console.log("workshop");
+                openWorkshop();
+              }
             }
           }
         }

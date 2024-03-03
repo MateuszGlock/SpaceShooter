@@ -11,6 +11,8 @@ body {
   margin: 0;
   font-family: "Press Start 2P";
 }
+#start-screen {
+}
 #game-tittle {
   display: flex;
   justify-content: center;
@@ -304,5 +306,9 @@ body {
 .signature {
   position: flex;
   color: rgb(72, 72, 72);
-  margin-top: 10%;
+
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  padding: 10px;
 }
