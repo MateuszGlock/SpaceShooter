@@ -81,6 +81,23 @@ window.onload = function () {
     drawingCanvas.height = innerHeight;
     drawingCanvas = drawingCanvas.getContext("2d");
 
+    //section of making writings on canvas
+
+    function createWaveClearedElement() {
+      const waveClearedDiv = document.createElement("div");
+      waveClearedDiv.id = "wave-cleared-message";
+      waveClearedDiv.classList.add("wave-cleared-message");
+
+      const waveClearedText = document.createElement("span");
+      waveClearedText.id = "wave-cleared-text";
+      waveClearedText.style.fontSize = "24px";
+      waveClearedDiv.appendChild(waveClearedText);
+
+      startScreen.appendChild(waveClearedDiv);
+
+      waveClearedText.innerText = "Wave cleared!";
+    }
+
     //setup for mobile devices - TO DO
     let isTouchDevice = "ontouchstart" in document.documentElement;
     const shootButton = document.createElement("button");
@@ -168,16 +185,6 @@ window.onload = function () {
       let waveNumber = 1;
       let requiredScore = 15 + (waveNumber - 1) * 10;
 
-      /**
-       * 1. zespawnownanie przeciwnika 25 razy - 325
-       * 2. sprawdzenie czy pozostał żywy przeciwnik
-       * 3.
-       *
-       *
-       *
-       *
-       *
-       */
       let enemiesSpawned = 0;
       let health = 100;
       playerImg.src = "src/img/SpaceShip.png";
@@ -446,6 +453,7 @@ window.onload = function () {
             }
           }
         }
+        createWaveClearedElement();
       }
       canvas.addEventListener("click", function () {
         fire();
@@ -473,6 +481,10 @@ window.onload = function () {
           drawGears(x, y, speed);
         }
         _enemies.splice(enemyNumber, 1);
+        if (enemy_explosion_sound.currentTime > 0) {
+          enemy_explosion_sound.pause();
+          enemy_explosion_sound.currentTime = 0;
+        }
         enemy_explosion_sound.play();
       }
 
@@ -667,7 +679,7 @@ window.onload = function () {
               _bullets.splice(l, 1);
               score++;
               if (_enemies.length === 0 && waveBreak) {
-                console.log("workshop");
+                createWaveClearedElement();
                 openWorkshop();
               }
             }

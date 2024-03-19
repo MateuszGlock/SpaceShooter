@@ -312,3 +312,26 @@ body {
   left: 0;
   padding: 10px;
 }
+.wave-cleared-message {
+  position: absolute;
+  top: 50%; /* Przykładowa wartość - dostosuj do swoich potrzeb */
+  left: 50%; /* Przykładowa wartość - dostosuj do swoich potrzeb */
+  transform: translate(-50%, -50%); /* Centrowanie na ekranie */
+  opacity: 0;
+  z-index: 9999;
+  transition: opacity 1s ease-in-out;
+  background-color: rgba(
+    255,
+    0,
+    0,
+    0.8
+  ); /* Przykładowy kolor tła z przejrzystością */
+  padding: 20px; /* Przykładowy padding - dostosuj do swoich potrzeb */
+  border-radius: 10px; /* Przykładowe zaokrąglenie krawędzi - dostosuj do swoich potrzeb */
+  color: white; /* Biały kolor tekstu */
+  font: 24px;
+}
+
+.wave-cleared-visible {
+  opacity: 1;
+}
